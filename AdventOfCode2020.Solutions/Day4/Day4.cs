@@ -8,14 +8,16 @@ namespace AdventOfCode2020.Solutions.Day4;
 
 public class Day4
 {
+    private readonly List<string> _requiredFields = new List<string>()
+        { "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid" };
+
     public int ValidatePassportsPart1(string fileName)
     {
         var lines = ParseFile.GetBlockOfLines("Day4", fileName);
-        var checkedFields = new List<string>() { "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid" };
         var invalidPassports = 0;
         foreach (var passwordFile in lines)
         {
-            var hasAllFields = checkedFields.Select(x => passwordFile.Contains(x)).All(i => i == true);
+            var hasAllFields = _requiredFields.Select(x => passwordFile.Contains(x)).All(i => i == true);
             if (!hasAllFields)
             {
                 invalidPassports++;
@@ -28,60 +30,80 @@ public class Day4
     public int ValidatePassports2(string fileName)
     {
         var lines = ParseFile.GetBlockOfLines("Day4", fileName);
-        
-        var passportWithFields = lines.Select(x =>
+        var parsedPassports = ParsePassports(lines);
+
+        var validPassports = 0;
+        for (var i = 0; i < parsedPassports.Count; i++)
+        {
+            var json = CreatePassportJson(parsedPassports[i]);
+
+            var passport = JsonSerializer.Deserialize<Passport>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+            if (passport == null)
+            {
+                continue;
+            }
+
+            var (isValid, errors) = IsValidPassport(passport);
+
+            if (isValid)
+            {
+                validPassports++;
+            }
+        }
+
+        return validPassports;
+    }
+
+    private static List<string[]> ParsePassports(string[] lines)
+    {
+        var parsedPassports = lines.Select(x =>
         {
             var splittedText = x.Replace("\n", " ");
             var keyValueStrings = splittedText.Split(" ");
             return keyValueStrings;
         }).ToList();
-        var validPassports = 0;
-        for (var i = 0; i < passportWithFields.Count; i++)
-        {
-            var json = "";
-            var passportWithField = passportWithFields[i];
-            for (var j = 0; j < passportWithField.Count(); j++)
-            {
-                var keyValue = passportWithField[j];
-                var items = keyValue.Split(':');
-                var isInt = items[0] is "byr" or "iyr" or "eyr";
-                var value = isInt ? $"{int.Parse(items[1])}" : $"\"{items[1]}\"";
-                if (j + 1 == passportWithField.Length)
-                {
-                    json += $"\"{items[0]}\":{value}";
-                }
-                else
-                {
-                    json += $"\"{items[0]}\":{value},\n";
-                }
-            }
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-
-            
-            json = $"{{{json}}}";
-            var passport =  JsonSerializer.Deserialize<Passport>(json, options);
-
-            if (passport == null )
-            {
-                continue;
-            }
-            var validationContext = new ValidationContext(passport);
-            var validationResults = new List<ValidationResult>();
-            var isValid = Validator.TryValidateObject(passport, validationContext, validationResults, true);
-            if (isValid == true )
-            {
-                validPassports++;
-            }
-            
-        }
-        return validPassports;
+        return parsedPassports;
     }
 
-    public class ValidHeightAttribute : ValidationAttribute
+    private static string CreatePassportJson(string[] parsedPassport)
+    {
+        var json = "";
+
+        for (var j = 0; j < parsedPassport.Count(); j++)
+        {
+            var keyValue = parsedPassport[j];
+            var items = keyValue.Split(':');
+            var isInt = items[0] is "byr" or "iyr" or "eyr";
+            var value = isInt ? $"{int.Parse(items[1])}" : $"\"{items[1]}\"";
+            if (j + 1 == parsedPassport.Length)
+            {
+                json += $"\"{items[0]}\":{value}";
+            }
+            else
+            {
+                json += $"\"{items[0]}\":{value},\n";
+            }
+        }
+
+        json = $"{{{json}}}";
+        return json;
+    }
+
+    public Tuple<bool, List<ValidationResult>> IsValidPassport(Passport passport)
+    {
+        var validationResults = new List<ValidationResult>();
+        var isValid =
+            Validator.TryValidateObject(passport, new ValidationContext(passport), validationResults, true);
+        return new(isValid, validationResults);
+    }
+
+    private class ValidHeightAttribute : ValidationAttribute
     {
         public override bool IsValid(object value)
 
@@ -106,8 +128,8 @@ public class Day4
             return false;
         }
     }
-    
-    public class ValidEyeColorAttribute : ValidationAttribute
+
+    private class ValidEyeColorAttribute : ValidationAttribute
     {
         public override bool IsValid(object value)
 
@@ -122,13 +144,22 @@ public class Day4
             return eyeColors.Contains(eyeColorFound);
         }
     }
-    public record Passport(
-        [Required, Range(1920, 2002)] int Byr,
-        [Required, Range(2010, 2020)] int Iyr,
-        [Required, Range(2020, 2030)] int Eyr,
-        [Required, ValidHeight] string Hgt,
-        [Required, ValidEyeColor] string Ecl,
-        [Required, RegularExpression("^#[a-z0-9]{6}$")] string Hcl,
-        [Required, RegularExpression("^[0-9]{9}$")] string Pid, 
-        string Cid);
+
+    public class Passport
+    {
+        [Required, Range(1920, 2002)] public int Byr { get; set; }
+
+        [Required, Range(2010, 2020)] public int Iyr { get; set; }
+        [Required, Range(2020, 2030)] public int Eyr { get; set; }
+        [Required, ValidHeight] public string Hgt { get; set; }
+        [Required, ValidEyeColor] public string Ecl { get; set; }
+
+        [Required, RegularExpression("^#[a-z0-9]{6}$")]
+        public string Hcl { get; set; }
+
+        [Required, RegularExpression("^[0-9]{9}$")]
+        public string Pid { get; set; }
+
+        public string? Cid { get; set; }
+    }
 }
