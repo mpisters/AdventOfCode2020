@@ -47,7 +47,7 @@ public class Day3
         var totalHorizontal = rows[0].Length;
         var totalVertical = rows.Count;
         var totalTrees = 0;
-        while (positionVertical != totalVertical -1)
+        while (positionVertical != totalVertical - 1)
         {
             positionHorizontal += increaseHorizontal;
             positionVertical += increaseVertical;
@@ -65,5 +65,5 @@ public class Day3
         return totalTrees;
     }
 
-    
+     
 }

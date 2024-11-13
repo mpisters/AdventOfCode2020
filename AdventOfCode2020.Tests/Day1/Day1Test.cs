@@ -1,6 +1,7 @@
-using AdventOfCode2020.Solutions.Day1;
+namespace AdventOfCode2020.Tests.Day1;
 
-public class Day1Test {
+public class Day1Test : ITest
+{
     
     [Fact]
     public void ShouldReturnResultExamplePart1(){
@@ -26,5 +27,5 @@ public class Day1Test {
         Assert.Equal(182588480, result);
     }
 
-    private static Day1 Sut() => new Day1();
-} 
+    private static Solutions.Day1.Day1 Sut() => new Solutions.Day1.Day1();
+}
