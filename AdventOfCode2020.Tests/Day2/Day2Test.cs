@@ -1,6 +1,6 @@
 namespace AdventOfCode2020.Tests.Day2;
 
-public class Day2Test
+public class Day2Test : ITest
 {
     [Fact]
     public void ShouldReturnResultExamplePart1()
