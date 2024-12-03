@@ -16,6 +16,11 @@ public class Day4Test : ITest
         Assert.Equal(222, result);
     }
 
+    public void ShouldReturnResultExamplePart2()
+    {
+        throw new NotImplementedException();
+    }
+
     [Fact]
     public void ShouldReturnResultPart2()
     {

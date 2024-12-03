@@ -7,75 +7,79 @@ public class Day5
     public int GetHighestBoardingPass(string filename)
     {
         var lines = ParseFile.GetLines("Day5", filename);
-        var rows = Enumerable.Range(0, 128);
-        var columns = Enumerable.Range(0, 9);
-        var ids = new List<int>();
+        var boardingPassIds = new List<int>();
         foreach (var line in lines)
         {
-            var positionRow = 1;
-            var positionColumn = 1;
-
-            for(var i = 0; i< line.Length; i++)
-            {
-                var state = line[i];
-
-                if (i < line.Length - 3)
-                {
-                    rows = GetNewRowsArray(rows, state);
-                    if (rows.Count() <= 2)
-                    {
-                        positionRow = rows.ElementAt(0);
-                    }
-                }
-
-                if (i >= line.Length - 3)
-                {
-                    var totalColumns = columns.Count() / 2;
-
-                    if (state == 'L')
-                    {
-                        columns = columns.Take(totalColumns).ToList();
-                    }
-
-                    if (state == 'R')
-                    {
-                        columns = columns.Skip(totalColumns).ToList();
-                    }
-                    if (columns.Count() == 1)
-                    {
-                        positionColumn = columns.ElementAt(0);
-                    }
-                }
-
-
-
-   
-            }
-
-            ids.Add(positionRow * 8 + positionColumn);
+            var firstPart = line.Substring(0, 7);
+            var secondPart = line.Substring(7, 3);
+            var row = GetRow(firstPart);
+            var column = GetColumn(secondPart);
+            var id = row * 8 + column;
+            boardingPassIds.Add(id);
         }
 
-        return ids.Max();
+        return boardingPassIds.Max();
     }
 
-    public IEnumerable<int> GetNewRowsArray(IEnumerable<int> rows, char state)
+    private static int GetColumn(string secondPart)
     {
-        var totalRows = rows.Count() / 2;
-
-
-            if (state == 'F')
+        var maxInt = 7d;
+        var minInt = 0d;
+        var index = 0;
+        var column = int.MaxValue;
+        foreach (var columnChar in secondPart)
+        {
+            var range = maxInt - minInt;
+            var half = Math.Ceiling(range / 2.0);
+            if (columnChar == 'L')
             {
-                var steps = totalRows == 1 ? 2 : totalRows;
-                rows = rows.Skip(0).Take(steps ).ToList();
+                maxInt -= half;
             }
 
-            if (state == 'B')
+            if (columnChar == 'R')
             {
-                var minPosition = totalRows;
-                rows = rows.Skip(minPosition);
+                minInt += half;
             }
-        
 
-        return rows;
+            if (index == 2)
+            {
+                column = columnChar == 'L' ? (int)minInt : (int)maxInt;
+            }
+
+            index++;
+        }
+
+        return column;
+    }
+
+    private static int GetRow(string firstPart)
+    {
+        var maxInt = 127d;
+        var minInt = 0d;
+        var row = int.MaxValue;
+        var index = 0;
+        foreach (var rowChar in firstPart)
+        {
+            var range = maxInt - minInt;
+            var half = Math.Ceiling(range / 2.0);
+               
+            if (rowChar == 'F')
+            {
+                maxInt -= half;
+            }
+
+            if (rowChar == 'B')
+            {
+                minInt += half;
+            }
+            
+            if (index == 6)
+            {
+                row = rowChar == 'F' ? (int)minInt : (int)maxInt;
+            }
+            index++;
+        }
+
+        return row;
     }
 }

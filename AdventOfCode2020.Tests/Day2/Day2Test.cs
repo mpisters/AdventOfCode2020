@@ -15,7 +15,12 @@ public class Day2Test : ITest
         var resutl = Sut().GetValidPasswordsPart1("input_part1.txt");
         Assert.Equal(410, resutl);
     }
-    
+
+    public void ShouldReturnResultExamplePart2()
+    {
+        throw new NotImplementedException();
+    }
+
     [Fact]
     public void ShouldReturnResultPart2()
     {
