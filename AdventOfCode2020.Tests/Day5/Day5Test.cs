@@ -14,7 +14,7 @@ public class Day5Test : ITest
     public void ShouldReturnResultPart1()
     {
         var result = Sut().GetHighestBoardingPass("input.txt");
-        Assert.Equal(820, result);
+        Assert.Equal(951, result);
     }
 
     public void ShouldReturnResultExamplePart2()
@@ -22,9 +22,11 @@ public class Day5Test : ITest
         throw new NotImplementedException();
     }
 
+    [Fact]
     public void ShouldReturnResultPart2()
     {
-        throw new NotImplementedException();
+        var result = Sut().GetMissingBoardingPass("input.txt");
+        Assert.Equal(653, result);
     }
     private Solutions.Day5.Day5 Sut() => new Solutions.Day5.Day5();
 }

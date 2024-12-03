@@ -7,6 +7,13 @@ public class Day5
     public int GetHighestBoardingPass(string filename)
     {
         var lines = ParseFile.GetLines("Day5", filename);
+        var boardingPassIds = GetBoardingPassIds(lines);
+
+        return boardingPassIds.Max();
+    }
+
+    private static List<int> GetBoardingPassIds(string[] lines)
+    {
         var boardingPassIds = new List<int>();
         foreach (var line in lines)
         {
@@ -18,7 +25,28 @@ public class Day5
             boardingPassIds.Add(id);
         }
 
-        return boardingPassIds.Max();
+        return boardingPassIds;
+    }
+
+    public int GetMissingBoardingPass(string filename)
+    {
+        var lines = ParseFile.GetLines("Day5", filename);
+        var boardingPassIds = GetBoardingPassIds(lines);
+
+
+        boardingPassIds.Sort();
+        var previous = boardingPassIds[0];
+        for (var i = 1; i < boardingPassIds.Count; i++)
+        {
+            var current = boardingPassIds[i];
+            var distance = current - previous;
+            if (distance > 1)
+            {
+                return current - 1;
+            }
+            previous = current;
+        }
+        return 0;
     }
 
     private static int GetColumn(string secondPart)
